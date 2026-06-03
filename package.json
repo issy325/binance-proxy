@@ -1,0 +1,15 @@
+{
+  "name": "binance-c2c-proxy",
+  "version": "1.0.0",
+  "description": "Proxy server to forward Binance C2C API calls from Google Apps Script",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
