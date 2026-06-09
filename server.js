@@ -21,13 +21,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// ── Proxy endpoint ────────────────────────────────────────────────────────────
+// ── C2C order history endpoint ────────────────────────────────────────────────
 app.get("/c2c-orders", async (req, res) => {
   try {
-    // Forward all query params (already signed by Apps Script) to Binance
-    const params      = new URLSearchParams(req.query);
-    const binanceUrl  = `https://api.binance.com/sapi/v1/c2c/orderMatch/listUserOrderHistory?${params}`;
-    const apiKey      = req.headers["x-mbx-apikey"];
+    const params     = new URLSearchParams(req.query);
+    const binanceUrl = `https://api.binance.com/sapi/v1/c2c/orderMatch/listUserOrderHistory?${params}`;
+    const apiKey     = req.headers["x-mbx-apikey"];
 
     const response = await fetch(binanceUrl, {
       method:  "GET",
@@ -41,7 +40,22 @@ app.get("/c2c-orders", async (req, res) => {
   }
 });
 
-// Health check
+// ── Public ticker endpoint (used by spread checker) ───────────────────────────
+// No Binance API key needed — just forwards the symbol and returns bid/ask.
+app.get("/ticker", async (req, res) => {
+  try {
+    const symbol     = req.query.symbol || "USDTZAR";
+    const binanceUrl = `https://api.binance.com/api/v3/ticker/bookTicker?symbol=${symbol}`;
+
+    const response = await fetch(binanceUrl);
+    const data     = await response.json();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Health check ──────────────────────────────────────────────────────────────
 app.get("/", (req, res) => res.send("Binance proxy running ✅"));
 
 app.listen(PORT, () => console.log(`Proxy listening on port ${PORT}`));
